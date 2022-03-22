@@ -1,3 +1,6 @@
+//  Interacts with an ERC20 contract deployed on Ropsten testnet to read its past Transfer events
+// contract address: 0xf002275490C2b62d786E22091815D70D54A379d5
+
 var Web3 = require('web3')
 var url = 'https://ropsten.infura.io/v3/f7d59d1679364f948826c7c269c1a3d6'
 var web3 = new Web3(url)
@@ -14,7 +17,7 @@ contract.getPastEvents(
         fromBlock: 0,
         toBlock: 'latest'
     },
-    (err, events) => { console.log(events.length)}
+    (err, events) => {  console.log("the total number of transfers: " + events.length)}
 )
 
 contract.getPastEvents(
@@ -23,25 +26,23 @@ contract.getPastEvents(
         fromBlock: 0,
         toBlock: 'latest'
     },
-    (err, events) => { console.log(events[events.length-1].returnValues.value)}
+    (err, events) => {console.log("amount transferred in the latest transaction: " + events[events.length-1].returnValues.value + " wei") }
 )
 
+// subscribes to the Transfer event
 var emitter = contract.events.Transfer({
-    //filter: {myIndexedParam: [20,23], myOtherIndexedParam: '0x123456789...'}, // Using an array means OR: e.g. 20 or 23
     fromBlock: 0
-}, function(error, event){ console.log(event); })
+}, function(error, event){ console.log("connected " + event); })
 
-// while(true){
-    await emitter.on("connected", function(subscriptionId){
-        console.log(subscriptionId);
-    })
-    .on('data', function(event){
-        console.log(event); // same results as the optional callback above
-    })
-    .on('changed', function(event){
-        // remove event from local database
-    })
-    .on('error', function(error, receipt) { // If the transaction was rejected by the network with a receipt, the second parameter will be the receipt.
-        //
-    });
-// }
+emitter.on("connected", function(subscriptionId){
+    console.log("connected " + subscriptionId);
+})
+.on('data', function(event){
+    console.log("data " + event); // same results as the optional callback above
+})
+.on('changed', function(event){
+    // remove event from local database
+})
+.on('error', function(error, receipt) { // If the transaction was rejected by the network with a receipt, the second parameter will be the receipt.
+    //
+});
